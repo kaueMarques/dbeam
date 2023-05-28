@@ -20,6 +20,11 @@
 
 package com.spotify.dbeam.avro;
 
+import java.nio.ByteBuffer;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import static java.sql.Types.ARRAY;
 import static java.sql.Types.BIGINT;
 import static java.sql.Types.BINARY;
@@ -44,12 +49,6 @@ import static java.sql.Types.TIME_WITH_TIMEZONE;
 import static java.sql.Types.TINYINT;
 import static java.sql.Types.VARBINARY;
 import static java.sql.Types.VARCHAR;
-
-import java.nio.ByteBuffer;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -60,18 +59,20 @@ public class JdbcAvroRecord {
 
   @FunctionalInterface
   public interface SqlFunction<T, R> {
-
     R apply(T t) throws SQLException;
   }
 
   private static ByteBuffer nullableBytes(final byte[] bts) {
-    if (bts != null) {
-      return ByteBuffer.wrap(bts);
-    } else {
-      return null;
-    }
+    return (bts != null ? ByteBuffer.wrap(bts) : null );
   }
 
+  /**
+   * <p>Note: In PostgreSQL, mySQL and H2, BIGINT is 8 bytes and fits into Java long</p>
+   * @param meta 
+   * @param column 
+   * @return SqlFunction
+   * @throws SQLException 
+   */
   static SqlFunction<ResultSet, Object> computeMapping(
       final ResultSetMetaData meta, final int column) throws SQLException {
     switch (meta.getColumnType(column)) {
@@ -83,7 +84,6 @@ public class JdbcAvroRecord {
       case NCHAR:
         return resultSet -> resultSet.getString(column);
       case BIGINT:
-        // In PostgreSQL, mySQL and H2, BIGINT is 8 bytes and fits into Java long
         return resultSet -> resultSet.getLong(column);
       case INTEGER:
       case SMALLINT:
@@ -98,20 +98,15 @@ public class JdbcAvroRecord {
       case TIME_WITH_TIMEZONE:
         return resultSet -> {
           final Timestamp timestamp = resultSet.getTimestamp(column, CALENDAR);
-          if (timestamp != null) {
-            return timestamp.getTime();
-          } else {
-            return null;
-          }
+          return (timestamp != null) ? timestamp.getTime() : null; 
         };
       case BOOLEAN:
         return resultSet -> resultSet.getBoolean(column);
       case BIT:
-        if (meta.getPrecision(column) <= 1) {
-          return resultSet -> resultSet.getBoolean(column);
-        } else {
-          return resultSet -> nullableBytes(resultSet.getBytes(column));
-        }
+        return (meta.getPrecision(column) <= 1  
+        ?(resultSet -> resultSet.getBoolean(column)) 
+        :(resultSet -> nullableBytes(resultSet.getBytes(column))) 
+        );
       case BINARY:
       case VARBINARY:
       case LONGVARBINARY:

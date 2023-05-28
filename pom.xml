@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -104,8 +106,10 @@
     <bouncycastle.version>1.70</bouncycastle.version>
 
     <beam.version>2.46.0</beam.version>
-    <!--Ensure Beam SDK compatibility-->
-    <!-- https://github.com/apache/beam/blob/release-2.46.0/buildSrc/src/main/groovy/org/apache/beam/gradle/BeamModulePlugin.groovy#L449 -->
+    <!--Ensure
+    Beam SDK compatibility-->
+    <!--
+    https://github.com/apache/beam/blob/release-2.46.0/buildSrc/src/main/groovy/org/apache/beam/gradle/BeamModulePlugin.groovy#L449 -->
     <google-cloud-libaries-bom.version>26.8.0</google-cloud-libaries-bom.version>
     <google-http-clients.version>1.42.2</google-http-clients.version>
     <grpc.version>1.52.1</grpc.version>
@@ -344,6 +348,11 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgresql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.microsoft.sqlserver</groupId>
+        <artifactId>mssql-jdbc</artifactId>
+        <version>12.2.0.jre11</version>
       </dependency>
       <dependency>
         <groupId>mysql</groupId>
@@ -649,7 +658,8 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <!--Using newer versions leads failure: https://issues.sonatype.org/browse/NEXUS-31301-->
+            <!--Using
+            newer versions leads failure: https://issues.sonatype.org/browse/NEXUS-31301-->
             <version>1.6.8</version>
             <extensions>true</extensions>
             <configuration>
@@ -665,7 +675,8 @@
       <id>pack</id>
       <build>
         <plugins>
-          <!--Based on: https://www.baeldung.com/executable-jar-with-maven-->
+          <!--Based
+          on: https://www.baeldung.com/executable-jar-with-maven-->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
@@ -695,8 +706,10 @@
                     </filter>
                   </filters>
                   <transformers>
-                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                    <transformer
+                      implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                    <transformer
+                      implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                       <mainClass>com.spotify.dbeam.jobs.JdbcAvroJob</mainClass>
                     </transformer>
                   </transformers>
@@ -718,7 +731,8 @@
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>0.8.9</version>
             <configuration>
-              <!--Configure to work on codecov-->
+              <!--Configure
+              to work on codecov-->
               <!--https://github.com/codecov/example-java/blob/master/pom.xml-->
               <excludes>
                 <exclude>**/AutoValue_*.*</exclude>

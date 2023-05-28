@@ -20,6 +20,12 @@
 
 package com.spotify.dbeam.avro;
 
+import java.sql.Connection;
+import java.sql.JDBCType;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import static java.sql.Types.ARRAY;
 import static java.sql.Types.BIGINT;
 import static java.sql.Types.BINARY;
@@ -44,19 +50,14 @@ import static java.sql.Types.TIME_WITH_TIMEZONE;
 import static java.sql.Types.TINYINT;
 import static java.sql.Types.VARBINARY;
 import static java.sql.Types.VARCHAR;
-
-import com.spotify.dbeam.args.QueryBuilderArgs;
-import java.sql.Connection;
-import java.sql.JDBCType;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Optional;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.spotify.dbeam.args.QueryBuilderArgs;
 
 public class JdbcAvroSchema {
 
@@ -130,12 +131,7 @@ public class JdbcAvroSchema {
 
     for (int i = 1; i <= meta.getColumnCount(); i++) {
 
-      final String columnName;
-      if (meta.getColumnName(i).isEmpty()) {
-        columnName = meta.getColumnLabel(i);
-      } else {
-        columnName = meta.getColumnName(i);
-      }
+      final String columnName = (meta.getColumnName(i).isEmpty() ? meta.getColumnLabel(i) : meta.getColumnName(i)) ;
 
       final int columnType = meta.getColumnType(i);
       final String typeName = JDBCType.valueOf(columnType).getName();
@@ -176,7 +172,7 @@ public class JdbcAvroSchema {
    *   <li>{@link com.mysql.cj.MysqlType }
    *   <li>{@link org.h2.value.TypeInfo }
    * </ul>
-   *
+   * Working in mssql update
    */
   private static SchemaBuilder.UnionAccumulator<SchemaBuilder.NullDefault<Schema>>
       setAvroColumnType(
@@ -202,18 +198,16 @@ public class JdbcAvroSchema {
       case TINYINT:
         if (Long.class.getCanonicalName().equals(columnClassName)) {
           return field.longType();
-        } else {
+        } 
           return field.intType();
-        }
       case TIMESTAMP:
       case DATE:
       case TIME:
       case TIME_WITH_TIMEZONE:
         if (useLogicalTypes) {
           return field.longBuilder().prop("logicalType", "timestamp-millis").endLong();
-        } else {
-          return field.longType();
         }
+          return field.longType();
       case BOOLEAN:
         return field.booleanType();
       case BIT:
@@ -222,9 +216,8 @@ public class JdbcAvroSchema {
         // https://www.postgresql.org/docs/8.2/datatype-bit.html
         if (precision <= 1) {
           return field.booleanType();
-        } else {
+        } 
           return field.bytesType();
-        }
       case BINARY:
       case VARBINARY:
       case LONGVARBINARY:
@@ -242,6 +235,6 @@ public class JdbcAvroSchema {
   }
 
   private static String normalizeForAvro(final String input) {
-    return input.replaceAll("[^A-Za-z0-9_]", "_");
+    return input.replaceAll("\\w", "_");
   }
 }

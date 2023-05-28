@@ -20,9 +20,10 @@
 
 package com.spotify.dbeam.args;
 
+import java.util.Map;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import java.util.Map;
 
 public class JdbcConnectionUtil {
 
@@ -30,13 +31,23 @@ public class JdbcConnectionUtil {
       ImmutableMap.of(
           "postgresql", "org.postgresql.Driver",
           "mysql", "com.mysql.cj.jdbc.Driver",
+          "mssql","com.microsoft.sqlserver.jdbc.SQLServerDriver",
           "h2", "org.h2.Driver");
-
+  /**
+   * <p>You need to pass some jdbc conction as</p>
+   * <li>jdbc:mysql</li>
+   * <li>jdbc:sqlserver</li>
+   * <li>jdbc:postgresql</li>
+   * <p>To have your class class Driver</p>
+   * @param url 
+   * @return Driver class
+   * @throws ClassNotFoundException 
+   */
   public static String getDriverClass(final String url) throws ClassNotFoundException {
     final String[] parts = url.split(":", 3);
     Preconditions.checkArgument(
         parts.length > 1 && "jdbc".equals(parts[0]) && driverMapping.get(parts[1]) != null,
-        "Invalid jdbc connection URL: %s. Expect jdbc:postgresql or jdbc:mysql as prefix.",
+        "Invalid jdbc connection URL: %s. Expect one of then jdbc:postgresql or jdbc:mysql, jdbc:sqlserver as prefix.",
         url);
     return Class.forName(driverMapping.get(parts[1])).getCanonicalName();
   }
